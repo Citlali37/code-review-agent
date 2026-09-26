@@ -2,6 +2,15 @@
 
 这是软件工程 Homework 1 的第一版实现。项目通过“用户输入、模型决策、工具调用、最终输出”的循环，对工作区中的源代码进行只读审查。
 
+## 作业信息
+
+| 项目 | 内容 |
+|---|---|
+| 姓名 | 干宸骅 |
+| 学号 | 2412190733 |
+| 班级 | 计科2403 |
+| 选题 | 代码审查 Agent |
+
 ## 已实现功能
 
 - 命令行单次运行与多轮交互模式
@@ -109,3 +118,5 @@ code-review-agent/
 - 补充 `Design.md` 中的模型服务商、测试结果和个人开发复盘。
 - 确保 `.env` 与 API Key 没有进入 Git 历史。
 - 准备一分钟以内的演示视频。
+
+演示流程见 [`docs/demo-script.md`](docs/demo-script.md)，最终提交步骤见 [`docs/submission-guide.md`](docs/submission-guide.md)。
