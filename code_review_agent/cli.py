@@ -66,14 +66,14 @@ def create_agent(args: argparse.Namespace) -> CodeReviewAgent:
     if args.demo:
         client = DemoReviewClient()
     else:
-        base_url = args.base_url or os.getenv("LLM_BASE_URL", "")
-        api_key = os.getenv("LLM_API_KEY", "")
-        model = args.model or os.getenv("LLM_MODEL", "")
+        base_url = args.base_url or os.getenv("LLM_BASE_URL", "https://api.deepseek.com")
+        api_key = os.getenv("DEEPSEEK_API_KEY") or os.getenv("LLM_API_KEY", "")
+        model = args.model or os.getenv("LLM_MODEL", "deepseek-flash")
         missing = [
             name
             for name, value in (
                 ("LLM_BASE_URL", base_url),
-                ("LLM_API_KEY", api_key),
+                ("DEEPSEEK_API_KEY", api_key),
                 ("LLM_MODEL", model),
             )
             if not value
@@ -90,6 +90,8 @@ def create_agent(args: argparse.Namespace) -> CodeReviewAgent:
             model=model,
             timeout_seconds=float(os.getenv("LLM_TIMEOUT_SECONDS", "60")),
             max_retries=int(os.getenv("LLM_MAX_RETRIES", "3")),
+            thinking=os.getenv("LLM_THINKING", "enabled") or None,
+            reasoning_effort=os.getenv("LLM_REASONING_EFFORT", "high") or None,
         )
     return CodeReviewAgent(client=client, tools=tools, max_steps=args.max_steps)
 

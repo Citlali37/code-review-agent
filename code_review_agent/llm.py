@@ -29,6 +29,8 @@ class OpenAICompatibleClient:
         model: str,
         timeout_seconds: float = 60,
         max_retries: int = 3,
+        thinking: str | None = None,
+        reasoning_effort: str | None = None,
     ) -> None:
         if not base_url.strip():
             raise ValueError("LLM_BASE_URL 不能为空。")
@@ -41,6 +43,14 @@ class OpenAICompatibleClient:
         self.model = model
         self.timeout_seconds = timeout_seconds
         self.max_retries = max(1, max_retries)
+        if thinking not in {None, "enabled", "disabled"}:
+            raise ValueError("LLM_THINKING 只能是 enabled 或 disabled。")
+        if reasoning_effort not in {None, "none", "low", "high", "max"}:
+            raise ValueError(
+                "LLM_REASONING_EFFORT 只能是 none、low、high 或 max。"
+            )
+        self.thinking = thinking
+        self.reasoning_effort = reasoning_effort
 
     def complete(
         self,
@@ -52,8 +62,13 @@ class OpenAICompatibleClient:
             "messages": messages,
             "tools": tools,
             "tool_choice": "auto",
-            "temperature": 0.1,
         }
+        if self.thinking is not None:
+            payload["thinking"] = {"type": self.thinking}
+        if self.reasoning_effort is not None:
+            payload["reasoning_effort"] = self.reasoning_effort
+        if self.thinking != "enabled":
+            payload["temperature"] = 0.1
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
 
         last_error: Exception | None = None
@@ -92,11 +107,15 @@ class OpenAICompatibleClient:
             raise LLMError("模型响应缺少 choices[0].message。") from exc
         if not isinstance(message, dict):
             raise LLMError("模型响应中的 message 格式不正确。")
-        return {
+        normalized = {
             "role": "assistant",
             "content": OpenAICompatibleClient._normalize_content(message.get("content")),
             "tool_calls": message.get("tool_calls") or [],
         }
+        reasoning_content = message.get("reasoning_content")
+        if reasoning_content is not None:
+            normalized["reasoning_content"] = reasoning_content
+        return normalized
 
     @staticmethod
     def _normalize_content(content: Any) -> str:
@@ -131,11 +150,15 @@ class DemoReviewClient:
         )
         current_turn = messages[latest_user_index + 1 :]
         tool_messages = [message for message in current_turn if message.get("role") == "tool"]
+        tool_names = self._tool_names_by_id(current_turn)
 
         if not tool_messages:
             return self._tool_call("list_files", {"path": ".", "pattern": "*.py"})
 
-        if not any(message.get("name") == "read_file" for message in tool_messages):
+        if not any(
+            tool_names.get(message.get("tool_call_id")) == "read_file"
+            for message in tool_messages
+        ):
             list_result = self._parse_tool_result(tool_messages[-1])
             files = list_result.get("data", {}).get("files", [])
             preferred = next(
@@ -145,7 +168,9 @@ class DemoReviewClient:
             return self._tool_call("read_file", {"path": preferred})
 
         read_message = next(
-            message for message in reversed(tool_messages) if message.get("name") == "read_file"
+            message
+            for message in reversed(tool_messages)
+            if tool_names.get(message.get("tool_call_id")) == "read_file"
         )
         result = self._parse_tool_result(read_message)
         if not result.get("ok"):
@@ -178,6 +203,19 @@ class DemoReviewClient:
             return json.loads(message.get("content", "{}"))
         except json.JSONDecodeError:
             return {"ok": False, "error": "工具结果不是有效 JSON。"}
+
+    @staticmethod
+    def _tool_names_by_id(messages: list[dict[str, Any]]) -> dict[str, str]:
+        names: dict[str, str] = {}
+        for message in messages:
+            if message.get("role") != "assistant":
+                continue
+            for tool_call in message.get("tool_calls") or []:
+                try:
+                    names[str(tool_call["id"])] = str(tool_call["function"]["name"])
+                except (KeyError, TypeError):
+                    continue
+        return names
 
     @staticmethod
     def _detect_demo_findings(path: str, numbered_text: str) -> list[dict[str, str]]:

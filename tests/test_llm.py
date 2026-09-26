@@ -11,6 +11,7 @@ class OpenAICompatibleClientTests(unittest.TestCase):
                     {
                         "message": {
                             "content": "完成",
+                            "reasoning_content": "internal-state",
                             "tool_calls": [{"id": "call-1", "function": {"name": "read_file"}}],
                         }
                     }
@@ -18,6 +19,7 @@ class OpenAICompatibleClientTests(unittest.TestCase):
             }
         )
         self.assertEqual(message["content"], "完成")
+        self.assertEqual(message["reasoning_content"], "internal-state")
         self.assertEqual(message["tool_calls"][0]["id"], "call-1")
 
     def test_rejects_malformed_response(self) -> None:

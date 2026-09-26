@@ -5,7 +5,7 @@
 ## 已实现功能
 
 - 命令行单次运行与多轮交互模式
-- OpenAI 兼容的 Chat Completions 模型接口
+- DeepSeek Chat Completions 模型接口
 - `list_files`：扫描工作区文件
 - `read_file`：按行读取代码
 - `search_code`：跨文件搜索文本
@@ -20,7 +20,7 @@
 ## 环境要求
 
 - Python 3.10 或更高版本
-- 使用真实模型时，需要一个支持工具调用的 OpenAI 兼容 Chat Completions 接口
+- 使用真实模型时，需要 DeepSeek API Key
 
 项目运行时不依赖第三方 Python 包。
 
@@ -34,7 +34,7 @@ py -3 -m code_review_agent --demo --workspace . --request "审查 examples/buggy
 
 离线模式会依次调用目录扫描和文件读取工具，然后用少量固定规则生成报告。它用于验证 Agent 循环，不代表真实模型的完整分析能力。
 
-## 接入真实模型
+## 接入 DeepSeek
 
 复制配置模板：
 
@@ -42,15 +42,19 @@ py -3 -m code_review_agent --demo --workspace . --request "审查 examples/buggy
 Copy-Item .env.example .env
 ```
 
-在 `.env` 中填写模型服务商提供的三个值：
+项目默认使用 `deepseek-flash`。在 `.env` 中只需要填写自己的 API Key：
 
 ```text
-LLM_BASE_URL=https://服务商提供的兼容接口地址/v1
-LLM_API_KEY=你的密钥
-LLM_MODEL=服务商提供的模型名称
+LLM_BASE_URL=https://api.deepseek.com
+DEEPSEEK_API_KEY=你的DeepSeek密钥
+LLM_MODEL=deepseek-flash
+LLM_THINKING=enabled
+LLM_REASONING_EFFORT=high
 ```
 
 不要提交 `.env`。项目已经在 `.gitignore` 中忽略该文件。
+
+如需更深入的审查，可以把模型改为 `deepseek-v4-pro`。默认的思考模式会在工具调用之间保留 `reasoning_content`，满足 DeepSeek 多轮工具调用要求。
 
 单次运行：
 
@@ -93,7 +97,7 @@ code-review-agent/
 
 ## 当前限制
 
-- 真实模式要求模型服务支持 OpenAI 风格的工具调用。
+- 真实模式需要可用的 DeepSeek API 账户和余额。
 - 搜索工具执行普通字符串搜索，不支持正则表达式和语法树分析。
 - 单个文件默认最多允许 300 KB，每次最多读取 400 行，防止上下文被大文件占满。
 - 当前只提供只读工具，不直接修改代码，也不执行不可信代码。

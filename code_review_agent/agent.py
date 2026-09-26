@@ -52,18 +52,25 @@ class CodeReviewAgent:
             assistant_message = self.client.complete(messages, self.tools.schemas)
             content = assistant_message.get("content") or ""
             tool_calls = assistant_message.get("tool_calls") or []
-            messages.append(
-                {
-                    "role": "assistant",
-                    "content": content,
-                    **({"tool_calls": tool_calls} if tool_calls else {}),
-                }
-            )
+            stored_assistant_message: dict[str, Any] = {
+                "role": "assistant",
+                "content": content,
+                **({"tool_calls": tool_calls} if tool_calls else {}),
+            }
+            if assistant_message.get("reasoning_content") is not None:
+                stored_assistant_message["reasoning_content"] = assistant_message[
+                    "reasoning_content"
+                ]
+            messages.append(stored_assistant_message)
 
             if not tool_calls:
                 if not content.strip():
                     raise AgentError("模型既没有输出结论，也没有调用工具。")
-                self._remember(request.strip(), content)
+                self._remember(
+                    request.strip(),
+                    content,
+                    assistant_message.get("reasoning_content"),
+                )
                 return ReviewResult(report=content.strip(), tool_steps=tuple(tool_steps))
 
             for tool_call in tool_calls:
@@ -74,7 +81,6 @@ class CodeReviewAgent:
                     {
                         "role": "tool",
                         "tool_call_id": tool_call_id,
-                        "name": name,
                         "content": self.tools.to_json(result),
                     }
                 )
@@ -86,13 +92,21 @@ class CodeReviewAgent:
     def reset_memory(self) -> None:
         self._memory.clear()
 
-    def _remember(self, request: str, report: str) -> None:
+    def _remember(
+        self,
+        request: str,
+        report: str,
+        reasoning_content: str | None = None,
+    ) -> None:
         if self.memory_turns == 0:
             return
+        assistant_memory: dict[str, Any] = {"role": "assistant", "content": report}
+        if reasoning_content is not None:
+            assistant_memory["reasoning_content"] = reasoning_content
         self._memory.extend(
             [
                 {"role": "user", "content": request},
-                {"role": "assistant", "content": report},
+                assistant_memory,
             ]
         )
         self._memory = self._memory[-2 * self.memory_turns :]
