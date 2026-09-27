@@ -120,3 +120,5 @@ code-review-agent/
 - 准备一分钟以内的演示视频。
 
 演示流程见 [`docs/demo-script.md`](docs/demo-script.md)，最终提交步骤见 [`docs/submission-guide.md`](docs/submission-guide.md)。
+
+已生成的静音演示视频：[`demo/2412190733干宸骅-演示.mp4`](demo/2412190733干宸骅-演示.mp4)，分辨率为 1280×720，时长 57 秒。
