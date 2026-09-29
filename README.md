@@ -133,8 +133,6 @@ code-review-agent/
 │       └── index.html # 浏览器页面
 ├── examples/          # 演示代码
 ├── tests/             # 自动化测试
-├── docs/              # 提交步骤
-├── scripts/           # 安全打包脚本
 ├── Design.md          # 架构和设计说明
 └── README.md
 ```
@@ -153,4 +151,12 @@ code-review-agent/
 - 确保 `.env` 与 API Key 没有进入 Git 历史。
 - 如果选择提交可选演示视频，时长控制在一分钟以内。
 
-最终提交步骤见 [`docs/submission-guide.md`](docs/submission-guide.md)。
+## 创建提交压缩包
+
+先确认所有改动已经提交，然后在项目根目录执行：
+
+```powershell
+git archive --format=zip --output="../2412190733干宸骅.zip" HEAD
+```
+
+该命令只打包当前 Git 提交中的文件，因此不会包含未被 Git 跟踪的 `.env`、缓存目录或本地临时文件。可以打开生成的压缩包复查：其中应当包含 `.env.example`，但不能包含 `.env`。
