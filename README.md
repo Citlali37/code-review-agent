@@ -14,6 +14,7 @@
 ## 已实现功能
 
 - 命令行单次运行与多轮交互模式
+- 本地 Web 界面，支持提交审查任务、查看工具调用和清空记忆
 - DeepSeek Chat Completions 模型接口
 - `list_files`：扫描工作区文件
 - `read_file`：按行读取代码
@@ -82,6 +83,30 @@ py -3 -m code_review_agent --workspace "待审查项目目录"
 - `:reset`：清空会话记忆
 - `:quit`：退出
 
+## 启动 Web 界面
+
+确认 `.env` 已填写 DeepSeek API Key 后，在项目根目录执行：
+
+```powershell
+py -3 -m code_review_agent --web --workspace .
+```
+
+看到启动提示后，在浏览器访问：
+
+```text
+http://127.0.0.1:8000
+```
+
+在左侧填写审查要求，点击“开始审查”，右侧会显示报告和本次调用过的工具。点击“清空记忆”可以开始一个不带历史上下文的新会话。服务运行期间不要关闭命令行窗口，结束时在命令行按 `Ctrl+C`。
+
+如果只想体验页面、不调用 DeepSeek，可以使用离线演示模式：
+
+```powershell
+py -3 -m code_review_agent --demo --web --workspace .
+```
+
+端口被占用时可以指定其他端口，例如 `--port 8080`。服务默认只监听 `127.0.0.1`，API Key 仅保存在服务端，不会发送到浏览器。
+
 ## 运行测试
 
 ```powershell
@@ -97,7 +122,10 @@ code-review-agent/
 │   ├── cli.py         # 命令行入口
 │   ├── llm.py         # 模型接口和离线演示客户端
 │   ├── prompts.py     # 系统提示词
-│   └── tools.py       # 只读代码工具与路径隔离
+│   ├── tools.py       # 只读代码工具与路径隔离
+│   ├── web.py         # 本地 HTTP 服务和 Web API
+│   └── static/
+│       └── index.html # 浏览器页面
 ├── examples/          # 演示代码
 ├── tests/             # 自动化测试
 ├── Design.md          # 架构和设计说明
@@ -110,6 +138,7 @@ code-review-agent/
 - 搜索工具执行普通字符串搜索，不支持正则表达式和语法树分析。
 - 单个文件默认最多允许 300 KB，每次最多读取 400 行，防止上下文被大文件占满。
 - 当前只提供只读工具，不直接修改代码，也不执行不可信代码。
+- Web 服务一次只执行一个 Agent 任务；前一个任务完成后才会处理下一个任务。
 
 ## 提交前检查
 

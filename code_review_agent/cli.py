@@ -8,12 +8,13 @@ from pathlib import Path
 from .agent import AgentError, CodeReviewAgent
 from .llm import DemoReviewClient, LLMError, OpenAICompatibleClient
 from .tools import ToolError, ToolRegistry
+from .web import run_web_server
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="code-review-agent",
-        description="会调用只读代码工具的命令行审查 Agent。",
+        description="会调用只读代码工具的代码审查 Agent，支持命令行与 Web。",
     )
     parser.add_argument(
         "--workspace",
@@ -38,6 +39,22 @@ def build_parser() -> argparse.ArgumentParser:
         "--verbose",
         action="store_true",
         help="在报告后显示本次调用过的工具名称。",
+    )
+    parser.add_argument(
+        "--web",
+        action="store_true",
+        help="启动本地 Web 界面，而不是命令行交互模式。",
+    )
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Web 监听地址，默认仅本机可访问：127.0.0.1。",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Web 监听端口，默认为 8000。",
     )
     return parser
 
@@ -130,9 +147,13 @@ def interactive_loop(agent: CodeReviewAgent, verbose: bool) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.web and args.request:
+        parser.error("--web 和 --request 不能同时使用。")
     try:
         agent = create_agent(args)
-        if args.request:
+        if args.web:
+            run_web_server(agent, host=args.host, port=args.port)
+        elif args.request:
             print_result(agent, args.request, args.verbose)
         else:
             interactive_loop(agent, args.verbose)

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "code-review-agent"
-version = "0.1.0"
+version = "0.2.0"
 description = "A small tool-using code review agent for Software Engineering Homework 1"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -16,3 +16,6 @@ code-review-agent = "code_review_agent.cli:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["code_review_agent*"]
+
+[tool.setuptools.package-data]
+code_review_agent = ["static/*.html"]
