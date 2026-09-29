@@ -63,6 +63,8 @@ class WebServerTests(unittest.TestCase):
         self.assertEqual(response.status, 200)
         self.assertIn("代码审查 Agent", body)
         self.assertIn("/api/review", body)
+        self.assertIn("function renderMarkdown", body)
+        self.assertNotIn("report.innerHTML", body)
 
     def test_health_endpoint(self) -> None:
         status, payload = self.request_json("/api/health")
