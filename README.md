@@ -133,6 +133,8 @@ code-review-agent/
 │       └── index.html # 浏览器页面
 ├── examples/          # 演示代码
 ├── tests/             # 自动化测试
+├── docs/              # 提交步骤
+├── scripts/           # 安全打包脚本
 ├── Design.md          # 架构和设计说明
 └── README.md
 ```
@@ -147,12 +149,8 @@ code-review-agent/
 
 ## 提交前检查
 
-- 替换示例截图和演示内容，使用自己的测试项目。
 - 确认 README 中的命令能在一台干净环境中运行。
-- 补充 `Design.md` 中的模型服务商、测试结果和个人开发复盘。
 - 确保 `.env` 与 API Key 没有进入 Git 历史。
-- 准备一分钟以内的演示视频。
+- 如果选择提交可选演示视频，时长控制在一分钟以内。
 
-演示流程见 [`docs/demo-script.md`](docs/demo-script.md)，最终提交步骤见 [`docs/submission-guide.md`](docs/submission-guide.md)。
-
-已生成的静音演示视频：[`demo/2412190733干宸骅-演示.mp4`](demo/2412190733干宸骅-演示.mp4)，分辨率为 1280×720，时长 57 秒。
+最终提交步骤见 [`docs/submission-guide.md`](docs/submission-guide.md)。

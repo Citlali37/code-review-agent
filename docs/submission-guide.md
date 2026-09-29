@@ -37,11 +37,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\package_submission.ps1
 
 - GitHub 仓库链接：`https://github.com/Citlali37/code-review-agent`
 - 备份压缩包：`2412190733干宸骅.zip`，必须小于 200 MB
-- 一分钟以内演示视频：可选，但建议提交
+- 一分钟以内演示视频：可选
 
-项目中已经包含 `demo/2412190733干宸骅-演示.mp4`，时长 57 秒且无音轨。安全打包脚本会自动将其包含在压缩包中。
-
-在课程提交平台找到 `001Homework1`，上传压缩包，并按平台要求填写 GitHub 链接。若平台没有单独的视频入口，可将视频与压缩包一并上传，或咨询助教。
+在课程提交平台找到 `001Homework1`，上传压缩包，并按平台要求填写 GitHub 链接。演示视频不是必交内容；如果选择提交，应录制当前版本并控制在一分钟以内。
 
 ## 4. 提交后复查
 
