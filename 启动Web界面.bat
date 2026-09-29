@@ -26,7 +26,7 @@ echo Workspace: %REVIEW_WORKSPACE%
 echo The browser will open automatically. Close this window to stop the server.
 echo.
 
-py -3 -m code_review_agent --web --open-browser --workspace "%REVIEW_WORKSPACE%"
+py -3 -m code_review_agent --web --open-browser --workspace "%REVIEW_WORKSPACE%\."
 set "RUN_EXIT_CODE=%ERRORLEVEL%"
 
 if not "%RUN_EXIT_CODE%"=="0" (
