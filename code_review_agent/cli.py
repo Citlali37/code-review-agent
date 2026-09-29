@@ -56,6 +56,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=8000,
         help="Web 监听端口，默认为 8000。",
     )
+    parser.add_argument(
+        "--open-browser",
+        action="store_true",
+        help="Web 服务启动后自动打开浏览器。",
+    )
     return parser
 
 
@@ -149,10 +154,17 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.web and args.request:
         parser.error("--web 和 --request 不能同时使用。")
+    if args.open_browser and not args.web:
+        parser.error("--open-browser 只能与 --web 一起使用。")
     try:
         agent = create_agent(args)
         if args.web:
-            run_web_server(agent, host=args.host, port=args.port)
+            run_web_server(
+                agent,
+                host=args.host,
+                port=args.port,
+                open_browser=args.open_browser,
+            )
         elif args.request:
             print_result(agent, args.request, args.verbose)
         else:

@@ -5,11 +5,12 @@ import unittest
 import urllib.error
 import urllib.request
 from pathlib import Path
+from unittest.mock import Mock, patch
 
 from code_review_agent.agent import CodeReviewAgent
 from code_review_agent.llm import DemoReviewClient
 from code_review_agent.tools import ToolRegistry
-from code_review_agent.web import create_server
+from code_review_agent.web import create_server, run_web_server
 
 
 class WebServerTests(unittest.TestCase):
@@ -89,6 +90,28 @@ class WebServerTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertTrue(payload["ok"])
         self.assertIn("已清空", payload["message"])
+
+    @patch("code_review_agent.web.webbrowser.open", return_value=True)
+    @patch("code_review_agent.web.create_server")
+    def test_run_web_server_can_open_browser(
+        self,
+        create_server_mock: Mock,
+        browser_open_mock: Mock,
+    ) -> None:
+        fake_server = create_server_mock.return_value
+        fake_server.server_address = ("127.0.0.1", 8765)
+
+        agent = CodeReviewAgent(DemoReviewClient(), ToolRegistry(self.root))
+        run_web_server(
+            agent,
+            host="127.0.0.1",
+            port=8765,
+            open_browser=True,
+        )
+
+        browser_open_mock.assert_called_once_with("http://127.0.0.1:8765")
+        fake_server.serve_forever.assert_called_once_with(poll_interval=0.25)
+        fake_server.server_close.assert_called_once_with()
 
 
 if __name__ == "__main__":

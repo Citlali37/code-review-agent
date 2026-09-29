@@ -85,10 +85,14 @@ py -3 -m code_review_agent --workspace "待审查项目目录"
 
 ## 启动 Web 界面
 
-确认 `.env` 已填写 DeepSeek API Key 后，在项目根目录执行：
+确认 `.env` 已填写 DeepSeek API Key 后，可以直接双击项目根目录中的 `启动Web界面.bat`。启动器会自动打开浏览器，并默认把本项目作为审查工作区。运行期间请保留弹出的服务窗口；关闭窗口或在其中按 `Ctrl+C` 即可停止。
+
+如果要审查其他项目，不需要修改启动器：在文件资源管理器中把其他项目的文件夹拖到 `启动Web界面.bat` 上。启动器会把拖入的文件夹作为工作区，Agent 只能读取该文件夹内部的文件。
+
+也可以在项目根目录手动执行：
 
 ```powershell
-py -3 -m code_review_agent --web --workspace .
+py -3 -m code_review_agent --web --open-browser --workspace .
 ```
 
 看到启动提示后，在浏览器访问：
@@ -117,6 +121,7 @@ py -3 -m unittest discover -s tests -v
 
 ```text
 code-review-agent/
+├── 启动Web界面.bat      # 双击启动，或把其他项目文件夹拖到它上面
 ├── code_review_agent/
 │   ├── agent.py       # Agent 循环与会话记忆
 │   ├── cli.py         # 命令行入口

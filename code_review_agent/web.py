@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sys
 import threading
+import webbrowser
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -171,6 +172,8 @@ def run_web_server(
     agent: CodeReviewAgent,
     host: str = "127.0.0.1",
     port: int = 8000,
+    *,
+    open_browser: bool = False,
 ) -> None:
     server = create_server(agent, host=host, port=port)
     actual_host, actual_port = server.server_address[:2]
@@ -179,8 +182,11 @@ def run_web_server(
             "警告：Web 服务并非只监听本机，请确认所在网络可信。",
             file=sys.stderr,
         )
-    print(f"代码审查 Agent Web 已启动：http://{actual_host}:{actual_port}")
+    url = f"http://{actual_host}:{actual_port}"
+    print(f"代码审查 Agent Web 已启动：{url}")
     print("按 Ctrl+C 停止服务。")
+    if open_browser and not webbrowser.open(url):
+        print(f"无法自动打开浏览器，请手动访问：{url}", file=sys.stderr)
     try:
         server.serve_forever(poll_interval=0.25)
     except KeyboardInterrupt:
